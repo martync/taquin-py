@@ -5,7 +5,7 @@ import curses
 GAME_TITLE = "`•.,¸¸ [ JEU DU TAQUIN ] ¸¸,.•´"
 
 # Nombre de cases par côté
-TAQUIN_SIZE = 5
+TAQUIN_SIZE = 4
 
 # Valeur de la case vide
 EMPTY_CASE_VALUE = ""
@@ -24,12 +24,12 @@ def get_available_movements():
     return []
 
 
-def move(movement):
+def move():
     # TODO : appliquer le mouvement de la case vide
     pass
 
 
-def has_won(movement):
+def has_won():
     # TODO : vérifier si le jeu est gagné
     pass
 
@@ -68,9 +68,8 @@ def handle_keypress(screen):
         raise KeyboardInterrupt
 
 
-def get_current_state_str():
-    global CURRENT_STATE
-    table = AsciiTable(CURRENT_STATE)
+def get_state_as_str(state):
+    table = AsciiTable(state)
     table.inner_heading_row_border = False
     table.inner_row_border = True
     table.justify_columns[0] = "center"
@@ -78,12 +77,12 @@ def get_current_state_str():
     return table.table
 
 
-def display_output(screen):
+def display_output(screen, state):
     # Title
     screen.addstr(0, 0, GAME_TITLE, curses.color_pair(1))
 
     # Table game
-    screen.addstr(2, 0, get_current_state_str(), curses.color_pair(1))
+    screen.addstr(2, 0, get_state_as_str(state), curses.color_pair(1))
 
     # Controls
     screen.addstr(4 + TAQUIN_SIZE * 2, 0, "Utiliser les flêches pour déplacer la case vide.")
@@ -91,13 +90,13 @@ def display_output(screen):
 
 
 def init_state():
-    global CURRENT_STATE
     cases = list(range(1, TAQUIN_SIZE ** 2)) + [EMPTY_CASE_VALUE]
     random.shuffle(cases)
-    CURRENT_STATE = [list(a) for a in zip(*[iter(cases)] * TAQUIN_SIZE)]
+    return [list(a) for a in zip(*[iter(cases)] * TAQUIN_SIZE)]
 
 
 def main():
+    global CURRENT_STATE
     """Fonction principale de l'application"""
     try:
         # Initalisation de l'UI
@@ -109,12 +108,12 @@ def main():
         stdscr.nodelay(True)
 
         # Récupération d'un taquin tiré aléatoirement
-        init_state()
+        CURRENT_STATE = init_state()
 
         while True:
             # Attend une action et affiche le résultat
             handle_keypress(stdscr)
-            display_output(stdscr)
+            display_output(stdscr, CURRENT_STATE)
 
             # Frequence de rafraichissement
             curses.napms(50)  # ms
